@@ -1,0 +1,53 @@
+---
+title: "Squid Analysis, JSOES"
+author: "Mary Hunsicker, Brandon Chasco, Kim Jacobson, Cheryl Morgan, Owen ??"
+date: "9/20/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library("ggplot2")
+theme_set(theme_bw())
+library("sf")
+library("rnaturalearth")
+library("rnaturalearthdata")
+library("rgeos")
+```
+
+## Data preparation 
+```{r, echo=FALSE}
+dat <- read.table("SquidData.csv", sep=",", header = TRUE)
+#Change the name of the CPUE heading to catch for now.
+names(dat)[20] <- "catch"
+```
+
+## Summary 
+This a analysis of the squid data from `r min(dat$Year)` to `r max(dat$Year)`.
+
+## Quick plot of the data
+
+```{r pressure, fig.cap="Quick plot of the data for each year.", fig.height=8, fig.width=8, echo=FALSE, warning=FALSE, comment=FALSE, warn.conflicts = FALSE, quietly=TRUE}
+world <- ne_countries(scale = "medium", returnclass = "sf")
+class(world)
+p <- ggplot(data = world) +
+    geom_sf() +
+    coord_sf(xlim = c(-123., -126.5), ylim = c(44., 49), expand = FALSE)
+p <- p + geom_point(data=dat, 
+                      aes(x=Lon, y=Lat),
+                    colour = "red",
+                    size=1, alpha=30/100)
+p <- p + facet_wrap(~Year)
+
+print(p)
+```
+
+```{r, echo=FALSE, fig.cap="Catch by year."}
+library(ggplot2)
+agx <- aggregate(list(Catch=dat$catch),
+               by=list(Year=dat$Year), mean)
+# p <- ggplot(agx, aes(x=Year, y=Catch)) + geom_point()
+p <- ggplot(dat, aes(x=Year, y=catch)) + geom_point()
+print(p)
+```
