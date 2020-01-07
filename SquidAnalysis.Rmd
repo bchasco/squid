@@ -2,7 +2,8 @@
 title: "Squid Analysis, JSOES"
 author: "Mary Hunsicker, Brandon Chasco, Kim Jacobson, Cheryl Morgan, Owen Welch"
 date: "9/20/2019"
-output: pdf_document
+output:
+  html_document: default
 ---
 
 
@@ -26,7 +27,7 @@ names(survey)[20] <- "catch"
 ```
 
 ## Summary 
-This a analysis of the squid data from `r min(survey$Year)` to `r max(survey$Year)`.
+This is an analysis of the squid data from `r min(survey$Year)` to `r max(survey$Year)`. Owen is going to start making some more summary statistics.
 
 ## Quick plot of the data
 
