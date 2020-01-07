@@ -18,13 +18,14 @@ library("rgeos")
 
 ## Data preparation 
 ```{r, echo=FALSE}
-dat <- read.table("SquidData.csv", sep=",", header = TRUE)
+survey <- read.table("SquidData.csv", sep=",", header = TRUE)
+landings <- read.table("marketSquid_PacFinLandings.csv", sep=",", header = TRUE)
 #Change the name of the CPUE heading to catch for now.
-names(dat)[20] <- "catch"
+names(survey)[20] <- "catch"
 ```
 
 ## Summary 
-This a analysis of the squid data from `r min(dat$Year)` to `r max(dat$Year)`.
+This a analysis of the squid data from `r min(survey$Year)` to `r max(survey$Year)`.
 
 ## Quick plot of the data
 
@@ -34,7 +35,7 @@ class(world)
 p <- ggplot(data = world) +
     geom_sf() +
     coord_sf(xlim = c(-123., -126.5), ylim = c(44., 49), expand = FALSE)
-p <- p + geom_point(data=dat, 
+p <- p + geom_point(data=survey, 
                       aes(x=Lon, y=Lat),
                     colour = "red",
                     size=1, alpha=30/100)
@@ -45,17 +46,17 @@ print(p)
 
 ```{r, echo=FALSE, fig.cap="Catch by year."}
 library(ggplot2)
-agx <- aggregate(list(Catch=dat$catch),
-               by=list(Year=dat$Year), mean)
+agx <- aggregate(list(Catch=survey$catch),
+               by=list(Year=survey$Year), mean)
 # p <- ggplot(agx, aes(x=Year, y=Catch)) + geom_point()
-p <- ggplot(dat, aes(x=Year, y=catch)) + geom_point()
+p <- ggplot(survey, aes(x=Year, y=catch)) + geom_point()
 print(p)
 ```
 
 ```{r, echo=FALSE, fig.cap="Catch by station."}
 library(ggplot2)
-agx <- aggregate(list(Catch=dat$catch),
-               by=list(transect=dat$Transect_Name), mean)
+agx <- aggregate(list(Catch=survey$catch),
+               by=list(transect=survey$Transect_Name), mean)
 
 p <- ggplot(agx, aes(x=transect, y=Catch)) + geom_bar(stat = "identity")
 
