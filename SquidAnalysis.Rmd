@@ -29,6 +29,14 @@ names(survey)[20] <- "catch"
 ## Summary 
 This is an analysis of the squid data from `r min(survey$Year)` to `r max(survey$Year)`. Owen is going to start making some more summary statistics.
 
+```{r}
+
+plot(1)
+
+```
+
+$x = \frac{1}{2}$
+
 ## Quick plot of the data
 
 ```{r pressure, fig.cap="Quick plot of the data for each year.", fig.height=8, fig.width=8, echo=FALSE, warning=FALSE, comment=FALSE, warn.conflicts = FALSE, quietly=TRUE}
