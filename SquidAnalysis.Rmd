@@ -26,6 +26,19 @@ landings <- read.table("marketSquid_PacFinLandings.csv", sep=",", header = TRUE)
 names(survey)[20] <- "catch"
 ```
 
+
+
+##Github commands that we are using
+
+Step 1) Always pull the latest version of the file.
+  git pull
+  
+Step 2) Make the necessary changes to the file.
+
+Step 3) git add <filename>
+Step 4) git commit -m "my comment."
+Step 5) git push
+
 ## Summary 
 This is an analysis of the squid data from `r min(survey$Year)` to `r max(survey$Year)`. Owen is going to start making some more summary statistics.
 
