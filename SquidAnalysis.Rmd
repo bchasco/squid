@@ -1,11 +1,9 @@
 ---
 title: "Squid Analysis, JSOES"
-author: "Mary Hunsicker, Brandon Chasco, Kim Jacobson, Cheryl Morgan, Owen ??"
+author: "Mary Hunsicker, Brandon Chasco, Kim Jacobson, Cheryl Morgan, Owen Welch"
 date: "9/20/2019"
 output: pdf_document
 ---
-
-## I'm making a stupid change for Brandon...again
 
 
 ```{r setup, include=FALSE, echo=FALSE}
