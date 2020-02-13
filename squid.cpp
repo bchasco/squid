@@ -29,14 +29,19 @@ Type objective_function<Type>::operator() ()
   DATA_SPARSE_MATRIX(G2);
 
   // Fixed effects
+  PARAMETER(fp);   // Mean of Gompertz-drift field
   PARAMETER_VECTOR(alpha);   // Mean of Gompertz-drift field
   PARAMETER(fsd);
   PARAMETER(phi);            // Offset of beginning from equilibrium
+  PARAMETER_VECTOR(eps_s);   //Station effect for counts
+  PARAMETER_VECTOR(eps_p);   //Station effect for p
   PARAMETER(log_tau_E);      // log-inverse SD of Epsilon
   PARAMETER(log_tau_O);      // log-inverse SD of Omega
   PARAMETER(log_kappa);      // Controls range of spatial variation
   PARAMETER(rho);             // Autocorrelation (i.e. density dependence)
-
+  PARAMETER(fs_sd);             //Station s.d.
+  PARAMETER(fp_sd);             //Station s.d.
+  
   // Random effects
   PARAMETER_ARRAY(Epsilon_input);  // Spatial process variation
   PARAMETER_VECTOR(Omega_input);   // Spatial variation in carrying capacity
@@ -44,7 +49,7 @@ Type objective_function<Type>::operator() ()
   // objective function -- joint negative log-likelihood
   using namespace density;
   Type jnll = 0;
-  vector<Type> jnll_comp(3);
+  vector<Type> jnll_comp(4);
   jnll_comp.setZero();
 
   // Spatial parameters
@@ -58,6 +63,7 @@ Type objective_function<Type>::operator() ()
 
   // Objects for derived values
   vector<Type> eta_x(n_x);
+  vector<Type> eta_p(n_x);
   array<Type> log_Dpred_xt(n_x, n_t);
   vector<Type> Omega_x(n_x);
   vector<Type> Equil_x(n_x);
@@ -77,20 +83,36 @@ Type objective_function<Type>::operator() ()
     }
   }
 
+  
   // Likelihood contribution from observations
   vector<Type> log_chat_i(n_i);
+  vector<Type> p = 1/(1+exp(-fp+eps_p));
   for (int i=0; i<n_i; i++){
-    
-    log_chat_i(i) = phi*pow(rho,t_i(i)) + 
-      (eta_x(x_s(s_i(i))) + 
-      Omega_x(x_s(s_i(i))) + 
-      Epsilon_xt(x_s(s_i(i)),t_i(i))) / 
-      (1-rho);
-    
-    if( !isNA(c_i(i)) ){
-      jnll_comp(2) -= dnorm( log(c_i(i)), log_chat_i(i), exp(fsd), true );
+    if(c_i(i)==0.){
+      log_chat_i(i) = 0;
+      // if( !isNA(c_i(i))){
+        jnll_comp(2) -= log(1.-p(s_i(i)));
+      // }
+    } 
+    if(c_i(i)!=0.){
+      log_chat_i(i) = phi*pow(rho,t_i(i)) + 
+        eps_s(s_i(i)) +
+        (eta_x(x_s(s_i(i))) + 
+        Omega_x(x_s(s_i(i))) + 
+        Epsilon_xt(x_s(s_i(i)),t_i(i))) / 
+        (1-rho);
+      // if( !isNA(c_i(i))){
+        jnll_comp(2) -= dnorm(log(c_i(i)), log_chat_i(i), exp(fsd), true );
+        jnll_comp(2) -= log(p(s_i(i)));
+      // }
     }
   }
+  jnll_comp(3) = 0.;
+  for(int i=0;i<eps_s.size();i++){
+    jnll_comp(3) -= dnorm(eps_s(i),Type(0.),exp(fs_sd),true);
+    jnll_comp(3) -= dnorm(eps_p(i),Type(0.),exp(fp_sd),true);
+  }
+  
   jnll = jnll_comp.sum();
 
   // // Diagnostics
@@ -102,6 +124,7 @@ Type objective_function<Type>::operator() ()
   REPORT( SigmaE );
   REPORT( SigmaO );
   REPORT( rho );
+  REPORT(eps_p);
   ADREPORT( Range );
   ADREPORT( SigmaE );
   ADREPORT( SigmaO );
@@ -110,6 +133,13 @@ Type objective_function<Type>::operator() ()
   REPORT( Omega_x );
   REPORT( Equil_x );
   REPORT( phi );
+  REPORT( p );
+  REPORT( log_chat_i);
+  REPORT(eps_s);
+  REPORT(eps_p);
+  REPORT(fs_sd);
+  REPORT(eta_x);
+  REPORT(eta_p);
   // 
   return jnll;
 }
