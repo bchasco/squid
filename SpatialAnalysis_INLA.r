@@ -35,7 +35,7 @@ max.edge = 0.99
 mesh = inla.mesh.2d(loc=cbind(df$locx, df$locy),
                      max.edge = c(0.9,0.9), cutoff = 0.1)
 try(dyn.unload("squid"))
-compile("squid.cpp")
+# compile("squid.cpp")
 dyn.load("squid")
 
 n_i <- nrow(survey)
@@ -106,6 +106,15 @@ if(UseMap){
   )
 }
 
+UseP_Map <- TRUE
+if(UseP_Map){
+  myMap <- list(eps_p=as.factor(rep(NA,length(Parameters$eps_p)))
+                ,eps_s=as.factor(rep(NA,length(Parameters$eps_s)))
+                ,fp_sd = as.factor(NA)
+                ,fs_sd = as.factor(NA)
+  )
+}
+
 # Make object
 Obj = MakeADFun(data=Data,
                 parameters=Parameters,
@@ -118,75 +127,6 @@ Obj = MakeADFun(data=Data,
 out <- nlminb(Obj$par,Obj$fn,Obj$gr)
 # SD <- sdreport(Obj)
 # 
+#This is the output of the model
 rep <- Obj$report()
-# 
-n <- 300
-xlim <- c(-125.5,-123.5)
-ylim <- c(44,48.5)
-proj = inla.mesh.projector(mesh, xlim = xlim,
-                           ylim = ylim, dims=c(n, n))
-field.proj = inla.mesh.project(proj, rep$Omega_x+rep$Epsilon_xt[,1])
-DF <- data.frame(yr=rep(unique(survey$Year)[1],n*n),
-                 x=rep(proj$x,300),
-                 y=rep(proj$y,each=300),
-                 dens = exp(c(as.matrix(field.proj))))
 
-for(i in 2:ncol(rep$Epsilon_xt)){
-  field.proj = inla.mesh.project(proj, rep$Omega_x+rep$Epsilon_xt[,i])
-  DF_tmp <- data.frame(yr=rep(unique(survey$Year)[i],n*n),
-                       x=rep(proj$x,300),
-                       y=rep(proj$y,each=300),
-                       dens = exp(c(as.matrix(field.proj))))
-  DF <- rbind(DF,DF_tmp)
-}
-DF$yr <- as.factor(DF$yr)
-
-
-# get the map, don't plot it but `fill` gets us named 'map' polygons
-world <- map("world", fill=TRUE, plot=FALSE)
-
-# convert the 'map' to something we can work with via geom_map
-IDs <- sapply(strsplit(world$names, ":"), function(x) x[1])
-world <- map2SpatialPolygons(world, IDs=IDs, proj4string=CRS("+proj=longlat +datum=WGS84"))
-
-# this does the magic for geom_map
-world_map <- fortify(world)
-
-myYears <- DF$yr%in%c(as.character(1998:2017))
-
-p <- ggplot(DF[myYears,], aes(x, y)) +
-  geom_raster(aes(x, y, fill = dens)) +
-  scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF")) +
-  facet_wrap(~yr, nrow=2) +
-  scale_x_continuous(limits = c(min(DF$x),max(DF$x)), expand = c(0, 0)) +
-  scale_y_continuous(limits = c(min(DF$y),max(DF$y)), expand = c(0, 0)) +
-  theme_bw() +
-  ylab("Latitude") +
-  xlab("Longitude") +
-  theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank()) +
-  annotation_map(map_data("world")) +
-  theme_bw()+theme(plot.background = element_blank(),panel.grid.major = element_blank()
-                   ,panel.grid.minor = element_blank()) +labs(title="",y="", x="")+
-  theme(axis.title.x = element_text(face="bold", size=8,colour = rgb(0,0,0)),axis.text.x = element_text(size=8,colour = rgb(0,0,0)))+
-  theme(axis.title.y = element_text(face="bold", size=8,colour = rgb(0,0,0)),axis.text.y = element_text(size=8,colour = rgb(0,0,0)))+
-  theme(plot.title = element_text(lineheight=.8, face="bold",size=10,colour = rgb(0,0,0)))+
-  theme(
-    panel.background = element_rect(fill = "transparent",colour = NA),
-    panel.grid.minor = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.border = element_rect(colour = "black", fill=NA, size=0.5))+
-  theme(legend.position="none")
-#Add the map as a base layer before the points
-
-# pdf("SpatialAnalysis_INLA.pdf", width = 7, height=10)
-print(p)
-# ggsave(plot = p, file = "SpatialAnalysis_INLA.png",
-       # type = "cairo-png",  bg = "transparent",
-       # width = 8, height = 8, units = "cm", dpi = 800)
-
-# # dev.off()
-# 
