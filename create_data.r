@@ -197,3 +197,5 @@ if(runSim){
   
   print(p)
 }
+
+save(simout,file="simout.out")
