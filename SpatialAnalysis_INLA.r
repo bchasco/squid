@@ -1,5 +1,5 @@
 library(INLA); library(sp); library(fields)
-library(geoR)
+# library(geoR)
 library(viridisLite)
 library(TMB)
 library(ggthemes)
@@ -35,7 +35,7 @@ max.edge = 0.99
 mesh = inla.mesh.2d(loc=cbind(df$locx, df$locy),
                      max.edge = c(0.9,0.9), cutoff = 0.1)
 try(dyn.unload("squid"))
-# compile("squid.cpp")
+compile("squid.cpp")
 dyn.load("squid")
 
 n_i <- nrow(survey)
