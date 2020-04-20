@@ -82,16 +82,16 @@ map_yt <- list(eps_yt = as.factor(matrix(NA,length(unique(x$TransectLat_i)),max(
 
 myMap <- list()
 est_tr <- 1
-est_s <- 1
+est_s <- 0
 est_y <- 1
-est_yt <- 1
+est_yt <- 0
 
 sim_tr <- 1
-sim_s <- 1
+sim_s <- 0
 sim_y <- 1
-sim_yt <- 1
+sim_yt <- 0
 
-nsim <-100
+nsim <-10
 
 testCor = 4
 runSim <- TRUE
