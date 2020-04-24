@@ -9,17 +9,17 @@
 
 library(TMB)
 lat_index <- 1
-x <- read.csv("SW_Data_Combined.csv")
+x <- read.table("comb_catches.txt", sep="\t",header=TRUE)
 x$Year <- as.numeric(as.character(x$Year))
 x <- x[!is.na(x$Year),]
 
-x$TransectLat_i <- as.integer(as.factor(round(x$Latitude,lat_index)))-1
-x$TransectLat <- round(x$Latitude,lat_index)
+x$TransectLat_i <- as.integer(as.factor(round(x$Lat,lat_index)))-1
+x$TransectLat <- round(x$Lat,lat_index)
 
-transDist <- sort(unique(round(x$Latitude,lat_index)))
+transDist <- sort(unique(round(x$Lat,lat_index)))
 
-c_i <- x$Lopa
-s_i <- as.integer(x$station)-1
+c_i <- x$CPUE
+s_i <- as.integer(x$Station)-1
 ag <- aggregate(c_i, by=list(s_i),sum)
 ag$s_i_re <- -1
 ii <- 0

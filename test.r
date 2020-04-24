@@ -1,3 +1,4 @@
+library("TMB")
 try(dyn.unload("test"))
 compile("test.cpp")
 dyn.load("test")
