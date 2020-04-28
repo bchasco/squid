@@ -8,17 +8,15 @@ require(sp)
 require(maptools)
 require(ggplot2)
 
-survey <- read.csv("SquidData.csv", sep=",", header = TRUE)
-survey <- survey[!is.na(survey$Distance_Offshore_nmi),]
-survey <- survey[survey$Study_Type=="Regular",]
-stations <- unique(survey$Station)
+survey <- read.csv("comb_catches.txt", sep="\t", header = TRUE)
+stations <- unique(survey$Station_Code)
 # for(i in stations){
 #   survey$Lat[survey$Station==i] <- mean(survey$Lat[survey$Station==i])
 #   survey$Lon[survey$Station==i] <- mean(survey$Lon[survey$Station==i])
 # 
 # }
 
-df = data.frame(y = log(survey$California_market_squid_), 
+df = data.frame(y = log(survey$CPUE), 
                 locx = survey$Lon, 
                 locy = survey$Lat)
 # spatial.scaling = 1
@@ -33,7 +31,8 @@ df$y = df$y-min(df$y)
 
 max.edge = 0.99
 mesh = inla.mesh.2d(loc=cbind(df$locx, df$locy),
-                     max.edge = c(0.9,0.9), cutoff = 0.1)
+                     max.n = 200, cutoff = 0.1)
+
 try(dyn.unload("squid"))
 compile("squid.cpp")
 dyn.load("squid")
@@ -44,9 +43,10 @@ n_t <- length(unique(survey$Year))
 n_p <- 1 #number of covariates
 
 x_s <- mesh$idx$loc - 1
-c_i <- survey$California_market_squid_
+c_i <- survey$CPUE
 s_i <- data.frame(Station=survey$Station)
-si_lu <- data.frame(s_i=1:length(unique(survey$Station)),Station=unique(survey$Station))
+si_lu <- data.frame(s_i=1:length(unique(survey$Station)),
+                    Station=unique(survey$Station))
 s_i <- merge(s_i,si_lu)$s_i-1
 
 t_i <- survey[,'Year']-min(survey[,'Year']) 

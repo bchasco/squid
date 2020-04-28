@@ -14,7 +14,7 @@ require(sp)
 require(maptools)
 require(ggplot2)
 
-n <- 50 #Raster cells
+n <- 200 #Raster cells
 xlim <- c(-125.5,-123.5) #longitude limits
 ylim <- c(44,48.5) #latitude limits
 #Projected mesh based on raster cells
