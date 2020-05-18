@@ -26,13 +26,16 @@ strata.limits <- data.frame(
 #To begin with we assume that we only have a single size class for squid.
 
 #For the time being the is only one category,
+#In the near future, we will change this include, small and large squid categories
 
 c_i <- rep(0,nrow(raw))
 
 #3) Sampling type, encounter, abundance, or biomass
 
 #For now we're going to use cpueN
+#The vector for include the catches is b_i
 
+b_i <- raw$CPUE
 
 #4) Spatial and spatiotemporal variation
 #There are two linear parts to the VAST model: the encounter probability and the 
@@ -76,12 +79,27 @@ FieldConfig <-c(Omega1 =1,  Epsilon1 =1,  Omega2 =1,Epsilon2 =1)
 #7) Temporal correlation
 #Again, '1' is encounter and '2' is for positive catches
 #Beta is for the yearly intercepts. If =0 then the intercepts are just fixed effects. 
-#If = 1 and there is temporal correlation
+#If = AR1' and there is temporal correlation auto-regressive process
 #Epsilon is for the spatio-temporal part. As a default, each spatial mesh at time t is not temporal correlated with
 #the next spatial mesh at time t if set = 0.
 RhoConfig= c("Beta1"=0, "Beta2"=0, "Epsilon1"=0, "Epsilon2"=0)
 
 #9) Catchability associated with vessel
+#This catchability is a little different that you may be used to. This has the dimension of 
+#n_i by n_k (number of samples by the number of covariates). These are things that affects
+#catchability associated with the vessel or example weather, vessel length, 
+Q_ik <- rep(1,nrow(raw))
+
+
+#10) Area offsets
+#This is for the effective area sampled. In the case of the squid data, we already have CPUE
+#so we would just set the offset to 1
+a_i <- rep(1,nrow(raw))
+
+#Question to ask Jim, should effort offset be set in a_i or Q_ik
+
+#11)
+
 #The catchability associated features not linked to habitat are 
 #important for reducing sampling bias. In the case of the squid surveys, 
 #these would include changes in things like vessel effects, marine mammal excluder 
@@ -98,17 +116,21 @@ OverdispersionConfig = c("Eta1"=0, "Eta2"=0)
 #and the number of vessel used is vessel small, we will use the later 
 #configuration
 
-#10)
-
-#11)
-
 
 #12)
-
 #The observation model is
-ObsModel = c(2,1) # Distribution for data, and link-function for linear predictors
+#The first number is for the postive catches: 2 is for log-normal
+#The second number is for the encounter probability: 0 is for conventional delta glmm
+ObsModel = c(2,0) # Distribution for data, and link-function for linear predictors
 
 #13)
+#Options for derived quantities
+#This is where we pick the derived variables we are interested in
+#Center of gravity is the obvious options, it looks for distribution shifts
+#based on an unbalanced design in the surveys
+Options <- c("Calculate_Range"=1, "Calculate_effective_area"=1)`
+
+
 
 #14)
 
