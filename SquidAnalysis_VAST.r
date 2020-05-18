@@ -1,3 +1,8 @@
+
+#Start by bringing in the flat data.
+raw <- read.csv("comb_catches.csv")
+
+
 #Decisions for VAST analysis. This follows the structure of Thorson (2019)
 #1) Define the grid
 #To begin with we will start with one region
@@ -7,6 +12,13 @@
 
 #-A multi region input looks like this
 
+strata.limits <- data.frame(
+  'STRATA' = c("Coastwide","CA","OR","WA"),
+  'north_border' = c(49.0, 42.0, 46.0, 49.0),
+  'south_border' = c(32.0, 32.0, 42.0, 46.0),
+  'shallow_border' = c(55, 55, 55, 55),
+  'deep_border' = c(1280, 1280, 1280, 1280)
+)
 
 
 
