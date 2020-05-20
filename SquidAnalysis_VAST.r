@@ -2,7 +2,6 @@
 #Start by bringing in the flat data.
 raw <- read.csv("comb_catches.csv")
 
-
 #Decisions for VAST analysis. This follows the structure of Thorson (2019)
 #1) Define the grid
 #To begin with we will start with one region
@@ -10,16 +9,14 @@ raw <- read.csv("comb_catches.csv")
 
 #-A single region input looks like this
 
-#-A multi region input looks like this
+strata.limits <- data.frame(STRATA = c("All_areas"))
 
+#-A multi region input looks like this
 strata.limits <- data.frame(
   'STRATA' = c("Coastwide","CA","OR","WA"),
   'north_border' = c(49.0, 42.0, 46.0, 49.0),
-  'south_border' = c(32.0, 32.0, 42.0, 46.0),
-  'shallow_border' = c(55, 55, 55, 55),
-  'deep_border' = c(1280, 1280, 1280, 1280)
+  'south_border' = c(32.0, 32.0, 42.0, 46.0)
 )
-
 
 
 #2) Species/size/age/stage
@@ -59,7 +56,9 @@ FieldConfig = c("Omega1" = 0, "Epsilon1" = 0, "Omega2" = 1, "Epsilon2" = 1)
 #200 knots to start with, and isotropy.
 
 Mesh.Method <- "Mesh" #mesh
+grid_size_km <- 100
 n_x <- 200 #number of knots
+Kmeans_Config = list( "randomseed"=1, "nstart"=100, "iter.max"=1e3 )
 Aniso <- FALSE #isotropic
 
 #6) Choosing the number of spatial and temporal factors
@@ -128,11 +127,46 @@ ObsModel = c(2,0) # Distribution for data, and link-function for linear predicto
 #This is where we pick the derived variables we are interested in
 #Center of gravity is the obvious options, it looks for distribution shifts
 #based on an unbalanced design in the surveys
-Options <- c("Calculate_Range"=1, "Calculate_effective_area"=1)`
-
+Options = c(SD_site_density = 0 
+            ,SD_site_logdensity = 0
+            ,Calculate_Range = 1 
+            ,Calculate_evenness = 0 
+            ,Calculate_effective_area = 1
+            ,Calculate_Cov_SE = 0 
+            ,Calculate_Synchrony = 0
+            ,Calculate_Coherence = 0)
 
 
 #14)
 
 #15)
 
+############Putting is all together
+
+settings <- make_settings(
+  n_x = n_x
+  ,Region = "california_current"
+  ,purpose = "index2"
+  ,strata.limits = strata.limits  #"All_areas"#strata.limits
+  ,FieldConfig = FieldConfig
+  ,RhoConfig = RhoConfig
+  ,OverdispersionConfig = OverdispersionConfig
+  ,ObsModel = ObsModel
+  ,knot_method = "samples"
+  ,bias.correct = FALSE
+  ,Options = Options
+)
+
+n_i <- nrow(raw)
+fit <- fit_model(settings = settings
+                 ,Lat_i = raw$Lat
+                 ,Lon_i = raw$Long
+                 ,t_i = raw$Year
+                 ,c_i = rep(0,n_i)
+                 ,b_i = raw$CPUE
+                 ,a_i = rep(0.01,n_i)
+                 ,v_i = rep(1,n_i)
+)
+
+plot_results(fit=fit
+             ,plot_set = 3)
