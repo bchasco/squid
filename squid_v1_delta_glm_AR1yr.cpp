@@ -97,6 +97,8 @@ Type objective_function<Type>::operator() ()
   REPORT( eps_p_y );
   
   REPORT(p_i);
+  ADREPORT(eps_c_y);
+  ADREPORT(eps_p_y);
   
   REPORT( jnll );
   return jnll;

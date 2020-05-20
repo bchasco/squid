@@ -1,0 +1,36 @@
+$Data_Set
+[1] "WCGBTS_canary"
+
+$Version
+[1] "VAST_v9_2_0"
+
+$Method
+[1] "Mesh"
+
+$grid_size_km
+[1] 25
+
+$n_x
+[1] 100
+
+$FieldConfig
+  Omega1 Epsilon1   Omega2 Epsilon2 
+       1        1        1        1 
+
+$RhoConfig
+   Beta1    Beta2 Epsilon1 Epsilon2 
+       0        0        0        0 
+
+$OverdispersionConfig
+Delta1 Delta2 
+     1      1 
+
+$ObsModel
+[1] 2 0
+
+$Options
+         SD_site_density       SD_site_logdensity          Calculate_Range 
+                   FALSE                    FALSE                     TRUE 
+Calculate_effective_area 
+                    TRUE 
+
