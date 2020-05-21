@@ -87,7 +87,7 @@ RhoConfig= c("Beta1"=0, "Beta2"=0, "Epsilon1"=0, "Epsilon2"=0)
 #This catchability is a little different that you may be used to. This has the dimension of 
 #n_i by n_k (number of samples by the number of covariates). These are things that affects
 #catchability associated with the vessel or example weather, vessel length, 
-Q_ik <- rep(1,nrow(raw))
+Q_ik <- raw[,c('x3m_Temp','x3m_Salinity','x3m_Chl')] #rep(1,nrow(raw))
 
 
 #10) Area offsets
@@ -163,7 +163,7 @@ fit <- fit_model(settings = settings
                  ,Lon_i = raw$Long
                  ,t_i = raw$Year
                  ,c_i = rep(0,n_i)
-                 ,b_i = raw$CPUE
+                 ,b_i = raw$CPUE #Number of squid captured.
                  ,a_i = rep(0.01,n_i)
                  ,v_i = rep(1,n_i)
 )
