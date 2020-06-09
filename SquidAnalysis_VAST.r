@@ -118,11 +118,11 @@ fit <- fit_model(settings = settings
                  ,Q_ik = as.matrix(Q_ik)
 )
 
-plot_dir <- paste0(getwd(),"/VAST_plots/")
-plot_ids <- c(1,3,6,7,11,13,14) 
-for(i in plot_ids){
-  plot_results(fit=fit
-               ,working_dir = plot_dir
-               ,plot_set = i)
-}
-
+# plot_dir <- paste0(getwd(),"/VAST_plots/")
+# plot_ids <- c(1,3,6,7,11,13,14) 
+# for(i in plot_ids){
+#   plot_results(fit=fit
+#                ,working_dir = plot_dir
+#                ,plot_set = i)
+# }
+# 
