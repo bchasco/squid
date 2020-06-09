@@ -55,6 +55,11 @@ RhoConfig= c("Beta1" = 0
 
 #8) Density dependent covariates
 #None for now
+# install.packages("splines")
+library(splines)
+formula = ~ bs( log(Station_Depth_m), knots=3, intercept=FALSE)
+# covariate_data <- data.frame(Lat=raw$Lat,Lon=raw$Lat,Year=raw$Year,Station_Depth_m=raw$Station_Depth_m/100)
+covariate_data <- data.frame(Lat=raw$Lat,Lon=raw$Lat,Year=NA,Station_Depth_m=raw$Station_Depth_m/100)
 
 #9) Catchability associated with vessel
 Q_ik <- raw[,c('X3m_Temp','X3m_Salinity','X3m_Chl')] #rep(1,nrow(raw))
@@ -116,6 +121,8 @@ fit <- fit_model(settings = settings
                  ,a_i = rep(0.01,n_i)
                  ,v_i = rep(1,n_i)
                  ,Q_ik = as.matrix(Q_ik)
+                 ,"formula"=formula
+                 ,"covariate_data"=covariate_data
 )
 
 plot_dir <- paste0(getwd(),"/VAST_plots/")
