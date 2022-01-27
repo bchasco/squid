@@ -1,0 +1,13 @@
+Model,Environmental covariates,Spatiotemporal,Intercepts,AIC,Delta AIC
+1,Not estimated,IID,Annual (fixed),8440.7,19.9
+2,Not estimated,IID,IID,8439.2,18.4
+3,Not estimated,IID,Constant,8437.9,17.0
+4,Not estimated,AR1,Annual (fixed),8443.8,22.9
+5,Not estimated,AR1,IID,DNC,NA
+6,Not estimated,AR1,Constant,8428.8,8.0
+7,Estimated,IID,Annual (fixed),8427.8,6.9
+8,Estimated,IID,IID,8428.9,8.1
+9,Estimated,IID,Constant,8427.2,6.4
+10,Estimated,AR1,Annual (fixed),8430.5,9.7
+11,Estimated,AR1,IID,DNC,NA
+12,Estimated,AR1,Constant,8420.8,0.0

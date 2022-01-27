@@ -1,5 +1,5 @@
 $Version
-[1] "VAST_v9_2_0"
+[1] "VAST_v12_0_0"
 
 $n_x
 [1] 175
@@ -19,11 +19,11 @@ $zone
 
 $FieldConfig
   Omega1 Epsilon1   Omega2 Epsilon2 
-       0        0        0        0 
+       1        1        1        1 
 
 $RhoConfig
    Beta1    Beta2 Epsilon1 Epsilon2 
-       0        0        1        1 
+       2        2        1        1 
 
 $VamConfig
 Method   Rank Timing 
@@ -37,7 +37,7 @@ $ObsModel
 [1] 2 0
 
 $vars_to_correct
-[1] "Index_cyl"
+[1] "Index_cyl" "Index_ctl"
 
 $Options
          SD_site_density       SD_site_logdensity          Calculate_Range       Calculate_evenness 
@@ -49,7 +49,7 @@ $grid_size_km
 [1] 25
 
 $max_cells
-[1] 2000
+[1] Inf
 
 $knot_method
 [1] "samples"

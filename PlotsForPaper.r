@@ -1,3 +1,6 @@
+fit <- All_fit
+library(ggplot2)
+
 #Figure 1
 df_data <- data.frame(E_km = fit$spatial_list$MeshList$loc_x[fit$spatial_list$knot_i,1],
                       N_km = fit$spatial_list$MeshList$loc_x[fit$spatial_list$knot_i,2],
@@ -18,23 +21,34 @@ plot_data(Extrapolation_List = fit$extrapolation_list,
 years_to_plot <- seq(1,22,2)
 plot_results(fit, 
              working_dir = paste0(getwd(),"/VAST_plots/"),
-             # years_to_plot = years_to_plot,
-             plot_set=1)
+             years_to_plot = years_to_plot,
+             plot_set=6)
 
 #Figures 3, 4, 5 
 plot_results(fit, 
              working_dir = paste0(getwd(),"/VAST_plots/"),
              strata_names = order(strata.limits$STRATA),
-             # years_to_plot = years_to_plot,
-             plot_set=2)
+             years_to_plot = years_to_plot,
+             plot_set=7)
+plot_results(fit, 
+             working_dir = paste0(getwd(),"/VAST_plots/"),
+             strata_names = order(strata.limits$STRATA),
+             years_to_plot = years_to_plot,
+             plot_set=3)
 
 
 #Figures 4 
 plot_results(fit, 
              working_dir = paste0(getwd(),"/VAST_plots/"),
-             # years_to_plot = years_to_plot,
+             years_to_plot = years_to_plot,
              strata_names = strata.limits$STRATA, #You have to sort these alphabetically to get the plots to make sense
              plot_set=7)
+
+plot_results(fit, 
+             working_dir = paste0(getwd(),"/VAST_plots/"),
+             # years_to_plot = years_to_plot,
+             strata_names = strata.limits$STRATA, #You have to sort these alphabetically to get the plots to make sense
+             plot_set=11)
 
 #Figure 5
 
@@ -56,6 +70,18 @@ p1 <- ggplot(DF, aes(x=year, y = index, fill=strata, color=strata)) +
 print(p1)
 
 #Figure 6
+fit <- All_fit
+library(ggplot2)
+library(cowplot)
+
+strata.limits <- data.frame(
+  'STRATA' = c("Coastwide","CA","OR","WA"),
+  'north_border' = c(49.0, 42.0, 46.0, 49.0),
+  'south_border' = c(37.0, 37.0, 42.0, 46.0)
+  # 'STRATA' = c("Coastwide","OR","WA"),
+  # 'north_border' = c(max(raw$Lat), 46.0, max(raw$Lat)),
+  # 'south_border' = c(min(raw$Lat), min(raw$Lat), 46.0)
+)
 mySD <- matrix(fit$parameter_estimates$SD$value[names(fit$parameter_estimates$SD$value)=="Index_cyl"],22,4)
 myIndex <- fit$Report$Index_cyl[1,,]
 upr <- myIndex+0.674*mySD
@@ -78,7 +104,9 @@ p2 <- ggplot(DF, aes(x=year, y = percent, fill=strata, color=strata)) +
   ylab("Ratio of annual index relative to 1998") +
   xlab("Calendar year")
 plot_grid(p1, p2, labels = c('A', 'B'), nrow=2, label_size = 12)
-print(p)
+
+print(p1)
+print(p2)
 
 #Supplemental figure of size distributions
 lens <- read.csv("comb_lengths.csv", header=TRUE)

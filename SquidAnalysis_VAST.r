@@ -7,9 +7,13 @@ raw <- read.csv("Update_Comb_Catch_wTrawlDist_flat.csv")
 # raw <- read.csv("Update_Comb_Catch_wTrawlDist.csv")
 
 #Adjust by wainright paper
-raw$catch[raw$Gear=="264NRT+MMED_Down"] <- raw$catch[raw$Gear=="264NRT+MMED_Down"]/0.48
-raw$catch[raw$Gear=="264NRT+MMED_Up"] <- raw$catch[raw$Gear=="264NRT+MMED_Up"]/0.88
-  
+raw$catch[raw$Gear=="264NRT+MMED_Down" & raw$Extension=="No"] <- raw$catch[raw$Gear=="264NRT+MMED_Down" & raw$Extension=="No"]/0.48
+raw$catch[raw$Gear=="264NRT+MMED_Up" & raw$Extension=="No"] <- raw$catch[raw$Gear=="264NRT+MMED_Up" & raw$Extension=="No"]/0.88
+
+#Adjustments for SWFSC - REad Cheryl's email from 9/15/2020
+raw$catch[raw$Gear=="264NRT+MMED modified" & raw$Extension=="No"] <- raw$catch[raw$Gear=="264NRT+MMED modified" & raw$Extension=="No"]/0.48
+raw$catch[raw$Gear=="264NRT+MMED" & raw$Extension=="No"] <- raw$catch[raw$Gear=="264NRT+MMED" & raw$Extension=="No"]/0.88
+
 #Get rid of any blanks
 raw <- raw[!apply(raw,1,function(x)return(sum(is.na(x)))),]
 
@@ -26,8 +30,7 @@ c_iz <- rep(0,dim(raw)[1]) #This needs to be numeric starting at 0
 # c_iz <- as.integer(as.factor(raw$size))-1 #This needs to be numeric starting at 0
 
 #3) CPUE for now must change it to numbers
-b_i <- raw$Total_CPUE
-# b_i <- raw$catch
+b_i <- raw$catch
 
 #4) Spatial and Spatio-temporal for both encounter and positive catches, see #6)
 FieldConfig = c("Omega1" = 0
@@ -55,23 +58,24 @@ FieldConfig <-c(Omega1 = 1 #Spatial corr. encounter probability
 #7) Temporal correlation
 RhoConfig= c("Beta1" = 0 #Temporal corr. encounter covariate intercepts
                ,"Beta2" = 0 #Temporal corr. for positive catch covariate intercepts
-               ,"Epsilon1"= 1 #Temporal corr. for encounter probability intercepts
-               ,"Epsilon2" = 1) #Temporal corr. for positive catch intercepts
+               ,"Epsilon1"= 0 #Temporal corr. for encounter probability intercepts
+               ,"Epsilon2" = 0) #Temporal corr. for positive catch intercepts
 
 #8) Density dependent covariates
 #None for now
 # install.packages("splines")
 library(splines)
-formula = ~ bs( log(Station_Depth_m), knots=3, intercept=FALSE)
+formula = ~ bs( log(X3m_Temp), knots=3, intercept=FALSE)
 
 # covariate_data <- data.frame(Lat=raw$Lat,Lon=raw$Lat,Year=raw$Year,Station_Depth_m=raw$Station_Depth_m/100)
-covariate_data <- data.frame(Lat=raw$Lat,Lon=raw$Lat,Year=NA,Station_Depth_m=raw$Station_Depth_m/100)
+covariate_data <- data.frame(Lat=raw$Lat,Lon=raw$Lat,Year=NA,X3m_Temp=(raw$X3m_Temp-mean(raw$X3m_Temp))/sd(raw$X3m_Temp))
 covariate_data$Year <- NA
 
 #9) Catchability associated with vessel
 Q_ik <- raw[,c('X3m_Temp','X3m_Salinity','X3m_Chl')] #rep(1,nrow(raw))
 for(i in 1:ncol(Q_ik)){
   Q_ik[is.na(Q_ik[,i]),i] <- mean(na.omit(Q_ik[,i]))
+  Q_ik[,i] <- (Q_ik[,i]-mean(Q_ik[,i]))/sd(Q_ik[,i])
 }
 
 #10) Area offsets
@@ -103,62 +107,87 @@ Options = c(SD_site_density = 0
 
 AICTable <- data.frame(Model=NA,AIC=NA)
 ii <- 1
-k <- 1
-for(k in 0:1){
-  for(i in 1:4){
-    myComb <- combn(1:4,i)
-    for(j in 1:ncol(myComb)){
-      FieldConfig[1:4] <- rep(1,4)
-      FieldConfig[myComb[,j]] <- 0
-      settings <- make_settings(
-        n_x = n_x
-        ,Region = "california_current"
-        ,purpose = "index2"
-        ,strata.limits = strata.limits  
-        ,FieldConfig = FieldConfig
-        ,RhoConfig = RhoConfig
-        ,OverdispersionConfig = OverdispersionConfig
-        ,ObsModel = ObsModel
-        ,knot_method = "samples"
-        ,bias.correct = FALSE
-        ,Options = Options
-      )
-      
-      if(k==0){
-        settings$RhoConfig <- c("Beta1" = 0 #Temporal corr. encounter covariate intercepts
-                                           ,"Beta2" = 0 #Temporal corr. for positive catch covariate intercepts
-                                           ,"Epsilon1"= 0 #Temporal corr. for encounter probability intercepts
-                                           ,"Epsilon2" = 0) #Temporal corr. for positive catch intercepts
-      }
-      if(k==1){
-        settings$RhoConfig <- c("Beta1" = 0 #Temporal corr. encounter covariate intercepts
-                                ,"Beta2" = 0 #Temporal corr. for positive catch covariate intercepts
-                                ,"Epsilon1"= 1 #Temporal corr. for encounter probability intercepts
-                                ,"Epsilon2" = 1) #Temporal corr. for positive catch intercepts
+# k <- 1
+for(q in 0:0){#include environmental covariates
+  for(k in 1:1){#0:1 temporal correlation
+    for(i in 0:0){#1:4 number of spatial and spatio-temporal flags turned on
+      myComb <- combn(1:4,i)
+      for(j in 1:ncol(myComb)){ #model combinations of spatial and spatiotemporal flags
+        FieldConfig[1:4] <- rep(1,4)
+        FieldConfig[myComb[,j]] <- 0
         
-      }      
-      fit <- tryCatch(fit_model(settings = settings
-                       ,Lat_i = raw$Lat
-                       ,Lon_i = raw$Lon
-                       ,t_i = raw$Year
-                       ,c_i = c_iz
-                       ,b_i =  b_i #Number of squid captured.
-                       ,a_i = a_i
-                       ,v_i = rep(0,nrow(raw))
-                       ,silent = TRUE
-                       #,Q_ik = as.matrix(Q_ik)
-                       # ,formula=formula
-                       # ,covariate_data=covariate_data
-                       ),error=function(e) NULL) 
-      
-      print(paste(c(k,FieldConfig),collapse=""))
+        settings <- make_settings(
+          n_x = n_x
+          ,Region = "california_current"
+          ,purpose = "index2"
+          ,strata.limits = strata.limits
+          ,FieldConfig = FieldConfig
+          ,RhoConfig = RhoConfig
+          # ,OverdispersionConfig = OverdispersionConfig
+          ,ObsModel = ObsModel
+          ,knot_method = "samples"
+          ,bias.correct = FALSE
+          ,Options = Options
+        )
+        
+        if(k==0){
+          settings$RhoConfig <- c("Beta1" = 0 #Temporal corr. encounter covariate intercepts
+                                  ,"Beta2" = 0 #Temporal corr. for positive catch covariate intercepts
+                                  ,"Epsilon1"= 0 #Temporal corr. for encounter probability intercepts
+                                  ,"Epsilon2" = 0) #Temporal corr. for positive catch intercepts
+        }
+        if(k==1){
+          settings$RhoConfig <- c("Beta1" = 2 #Temporal corr. encounter covariate intercepts
+                                  ,"Beta2" = 2 #Temporal corr. for positive catch covariate intercepts
+                                  ,"Epsilon1"= 0 #Temporal corr. for encounter probability intercepts
+                                  ,"Epsilon2" = 0) #Temporal corr. for positive catch intercepts
+          # if(FieldConfig[3]==1){FieldConfig[3]=="AR1"}
+          # if(FieldConfig[4]==1){FieldConfig[4]=="AR1"}
+          
+        }
 
-      AICTable[ii,] <- c(paste(c(k,FieldConfig),collapse=""),
-                         fit$parameter_estimates$AIC[1])
-      ii <- ii + 1
-      
+        if(q==1){
+          fit <- tryCatch(fit_model(settings = settings
+                                    ,Lat_i = raw$Lat
+                                    ,Lon_i = raw$Lon
+                                    ,t_i = raw$Year
+                                    # ,c_i = c_iz
+                                    ,b_i =  b_i #Number of squid captured.
+                                    ,a_i = a_i
+                                    # ,v_i = rep(0,nrow(raw))
+                                    ,silent = TRUE
+                                    ,Q_ik = as.matrix(Q_ik)
+                                    # ,formula=formula
+                                    # ,covariate_data=covariate_data
+          ),error=function(e) NULL) 
+        }
+        if(q==0){
+          fit <- tryCatch(fit_model(settings = settings
+                                    ,Lat_i = raw$Lat
+                                    ,Lon_i = raw$Lon
+                                    ,t_i = raw$Year
+                                    # ,c_i = c_iz
+                                    ,b_i =  b_i #Number of squid captured.
+                                    ,a_i = a_i
+                                    # ,v_i = rep(0,nrow(raw))
+                                    ,silent = TRUE
+                                    # ,Q_ik = as.matrix(Q_ik)
+                                    # ,formula=formula
+                                    # ,covariate_data=covariate_data
+          ),error=function(e) NULL) 
+        }
+        
+        print(paste(c(q,k,FieldConfig),collapse=""))
+        
+        AICTable[ii,] <- c(paste(c(q,k,FieldConfig),collapse=""),
+                           fit$parameter_estimates$AIC)
+        ii <- ii + 1
+        
+      }
     }
-  }
+  }  
 }
 
+
+save(AICTable,file="AICTable.csv")
 # source("modelvalidation.r")

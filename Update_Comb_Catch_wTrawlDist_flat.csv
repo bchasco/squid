@@ -1,4 +1,4 @@
-Survey,cruise,Station_Code,Station,Year,Date,Time,Lat,Long,Station_Depth_m,Distance_Offshore_nmi,Gear,Extension,Species,Total_CPUE,CPUE<80,CPUE>80,TrawlDist_km,3m_Temp,3m_Salinity,3m_Chl,Top20m_Temp,Top20m_Salinity,CTD_Comments
+Survey,cruise,Station_Code,Station,Year,Date,Time,Lat,Long,Station_Depth_m,Distance_Offshore_nmi,Gear,Extension,Species,catch,CPUE<80,CPUE>80,TrawlDist_km,3m_Temp,3m_Salinity,3m_Chl,Top20m_Temp,Top20m_Salinity,CTD_Comments
 SWFSC,FR1001,FR100101T1,NH05,2010,6/30/2010,14:06,44.67,-124.17,58.5,5,264NRT,No,California market squid,0,0,0,3.2206453,11.75399971,32.28099823,4.64170266,9.489194393,33.02977753,
 SWFSC,FR1001,FR100102T1,HH01,2010,7/1/2010,8:05,44,-124.1708333,30,1.4,264NRT,No,California market squid,0.482906953,0,0.482906953,2.0707923,9.538999557,33.42599869,5.51954693,8.825485039,33.64295025,
 SWFSC,FR1001,FR100103T1,HH02,2010,7/1/2010,10:00,44,-124.2116667,55,3.2,264NRT,No,California market squid,1.153496999,0,1.153496999,3.467716,9.683300018,33.26100159,5.45844825,9.420420074,33.43150024,
